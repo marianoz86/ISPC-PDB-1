@@ -26,7 +26,7 @@ def agregar_mascota():
     nombre = input("Ingrese nombre de la mascota: ")
     especie = input("Ingrese especie: ")
     raza = input("Ingrese raza: ")
-    fecha_nacimiento = input("Ingrese fecha de nacimiento (YYYY-MM-DD): ")
+    fecha_nacimiento = input("Ingrese fecha de nacimiento (AAAA-MM-DD): ")
 
     print(f"\nCliente seleccionado: {tutor[1]} {tutor[2]}\n")
 

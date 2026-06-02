@@ -96,6 +96,7 @@ def menu_crud_clientes():
         print("\n===== GESTIONAR CLIENTES =====")
         print("1. Agregar cliente")
         print("2. Ver clientes")             
+        print("3. Modificar CLiente")
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -106,7 +107,10 @@ def menu_crud_clientes():
 
         elif opcion == "2":
             print("Ver clientes")
-            crud_clientes.ver_clientes()      
+            crud_clientes.ver_clientes()     
+
+        elif opcion == "3":
+            print("Modificar clientes")                   
 
         elif opcion == "0":
             break
