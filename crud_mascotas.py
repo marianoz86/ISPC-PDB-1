@@ -150,3 +150,80 @@ def agregar_historia_clinica():
 
     cursor.close()
     conexion.close()
+
+def eliminar_mascota():
+
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    dni = input("Ingrese DNI del cliente: ")
+
+    query_cliente = "SELECT nombre, apellido FROM tutor WHERE dni = %s"
+
+    cursor.execute(query_cliente, (dni,))
+
+    cliente = cursor.fetchone()
+
+    if cliente is None:
+
+        print("El cliente no existe")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print(f"\nCliente: {cliente[0]} {cliente[1]}")
+
+    query_mascotas = "SELECT mascota_id, nombre, especie, raza FROM mascota WHERE dni_tutor = %s"
+
+    cursor.execute(query_mascotas, (dni,))
+
+    mascotas = cursor.fetchall()
+
+    if len(mascotas) == 0:
+
+        print("El cliente no tiene mascotas registradas")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print("\n===== MASCOTAS DISPONIBLES =====\n")
+
+    print(f"{'ID':<5} {'NOMBRE':<15} {'ESPECIE':<15} {'RAZA':<15}")
+
+    print("-" * 55)
+
+    for fila in mascotas:
+
+        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15}")
+
+    mascota_id = input("\nSeleccione ID de la mascota a eliminar: ")
+
+    query_verificar = "SELECT * FROM mascota WHERE mascota_id = %s AND dni_tutor = %s"
+
+    cursor.execute(query_verificar, (mascota_id, dni))
+
+    mascota = cursor.fetchone()
+
+    if mascota is None:
+
+        print("La mascota no existe")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    query_eliminar = "DELETE FROM mascota WHERE mascota_id = %s"
+
+    cursor.execute(query_eliminar, (mascota_id,))
+
+    conexion.commit()
+
+    print("Mascota eliminada correctamente")
+
+    cursor.close()
+    conexion.close()

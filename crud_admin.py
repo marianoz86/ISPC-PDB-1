@@ -50,17 +50,46 @@ def agregar_profesional():
     conexion = conectar()
     cursor = conexion.cursor()
 
-    servicio_id = input("Ingrese ID del servicio: ")
+    dni = input("Ingrese DNI: ")
 
-    query_verificar = "SELECT * FROM servicio WHERE servicio_id = %s"
+    query_verificar = "SELECT * FROM profesional WHERE dni = %s"
 
-    cursor.execute(query_verificar, (servicio_id,))
+    cursor.execute(query_verificar, (dni,))
+
+    profesional = cursor.fetchone()
+
+    if profesional is not None:
+
+        print("Ya existe un profesional con ese DNI")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print("\n===== SERVICIOS DISPONIBLES =====\n")
+
+    query_servicios = "SELECT * FROM servicio"
+
+    cursor.execute(query_servicios)
+
+    servicios = cursor.fetchall()
+
+    for fila in servicios:
+
+        print(f"{fila[0]} - {fila[1]}")
+
+    servicio_id = input("\nSeleccione ID del servicio: ")
+
+    query_servicio = "SELECT * FROM servicio WHERE servicio_id = %s"
+
+    cursor.execute(query_servicio, (servicio_id,))
 
     servicio = cursor.fetchone()
 
     if servicio is None:
 
-        print("El servicio no existe. Debe ingresar un servicio registrado.")
+        print("El servicio no existe")
 
         cursor.close()
         conexion.close()
@@ -76,9 +105,9 @@ def agregar_profesional():
     mail = input("Ingrese mail: ")
     direccion = input("Ingrese dirección: ")
 
-    query = "INSERT INTO profesional (matricula, servicio_id, nombre, apellido, telefono, mail, direccion) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    query = "INSERT INTO profesional (dni, matricula, servicio_id, nombre, apellido, telefono, mail, direccion) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
-    valores = (matricula, servicio_id, nombre, apellido, telefono, mail, direccion)
+    valores = (dni, matricula, servicio_id, nombre, apellido, telefono, mail, direccion)
 
     cursor.execute(query, valores)
 
@@ -94,7 +123,7 @@ def ver_profesionales():
     conexion = conectar()
     cursor = conexion.cursor()
 
-    query = "SELECT profesional.matricula, profesional.nombre, profesional.apellido, profesional.telefono, servicio.tipo_servicio FROM profesional INNER JOIN servicio ON profesional.servicio_id = servicio.servicio_id"
+    query = "SELECT profesional.dni, profesional.matricula, profesional.nombre, profesional.apellido, profesional.telefono, servicio.tipo_servicio FROM profesional INNER JOIN servicio ON profesional.servicio_id = servicio.servicio_id"
 
     cursor.execute(query)
 
@@ -102,13 +131,13 @@ def ver_profesionales():
 
     print("\n===== LISTA DE PROFESIONALES =====\n")
 
-    print(f"{'MATRÍCULA':<15} {'NOMBRE':<15} {'APELLIDO':<15} {'TELÉFONO':<15} {'SERVICIO':<20}")
+    print(f"{'DNI':<15} {'MATRÍCULA':<15} {'NOMBRE':<15} {'APELLIDO':<15} {'TELÉFONO':<15} {'SERVICIO':<20}")
 
-    print("-" * 80)
+    print("-" * 95)
 
     for fila in resultados:
 
-        print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:<20}")
+        print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:<15} {fila[5]:<20}")
 
     cursor.close()
     conexion.close()

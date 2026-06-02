@@ -94,9 +94,7 @@ def menu_crud_clientes():
 
         print("\n===== GESTIONAR CLIENTES =====")
         print("1. Agregar cliente")
-        print("2. Ver clientes")
-        print("3. Modificar cliente")
-        print("4. Eliminar cliente")
+        print("2. Ver clientes")             
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -107,13 +105,7 @@ def menu_crud_clientes():
 
         elif opcion == "2":
             print("Ver clientes")
-            crud_clientes.ver_clientes()
-
-        elif opcion == "3":
-            print("Modificar cliente")
-
-        elif opcion == "4":
-            print("Eliminar cliente")
+            crud_clientes.ver_clientes()      
 
         elif opcion == "0":
             break
@@ -126,10 +118,9 @@ def menu_crud_mascotas():
 
         print("\n===== GESTIONAR MASCOTAS =====")
         print("1. Agregar mascota")
-        print("2. Ver mascotas")
-        print("3. Modificar mascota")
-        print("4. Eliminar mascota")
-        print("5. Historia Clínica")
+        print("2. Ver mascotas")        
+        print("3. Historia Clínica")
+        print("4. Eliminar Mascota")
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -140,17 +131,15 @@ def menu_crud_mascotas():
 
         elif opcion == "2":
             print("Ver mascotas")
-            crud_mascotas.ver_mascotas()
-
-        elif opcion == "3":
-            print("Modificar mascota")
-
-        elif opcion == "4":
-            print("Eliminar mascota")
+            crud_mascotas.ver_mascotas()     
         
-        elif opcion == "5":            
+        elif opcion == "3":            
             print("Historia Clinica")
             menu_historia_clinica()
+        
+        elif opcion == "4":            
+            print("Eliminar Mascota")
+            crud_mascotas.eliminar_mascota()
 
         elif opcion == "0":
             break

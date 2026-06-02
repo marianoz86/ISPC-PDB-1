@@ -6,28 +6,55 @@ def generar_turno():
     conexion = conectar()
     cursor = conexion.cursor()
 
-    mascota_id = input("Ingrese ID de la mascota: ")
+    dni = input("Ingrese DNI del cliente: ")
 
-    query_mascota = "SELECT * FROM mascota WHERE mascota_id = %s"
+    query_cliente = "SELECT nombre, apellido FROM tutor WHERE dni = %s"
 
-    cursor.execute(query_mascota, (mascota_id,))
+    cursor.execute(query_cliente, (dni,))
 
-    mascota = cursor.fetchone()
+    cliente = cursor.fetchone()
 
-    if mascota is None:
+    if cliente is None:
 
-        print("La mascota no existe")
+        print("El cliente no existe")
 
         cursor.close()
         conexion.close()
 
         return
 
-    print(f"\nMascota seleccionada: {mascota[2]}\n")
+    print(f"\nCliente: {cliente[0]} {cliente[1]}")
 
-    print("===== SERVICIOS DISPONIBLES =====\n")
+    query_mascotas = "SELECT mascota_id, nombre, especie FROM mascota WHERE dni_tutor = %s"
 
-    query_servicios = "SELECT * FROM servicio"
+    cursor.execute(query_mascotas, (dni,))
+
+    mascotas = cursor.fetchall()
+
+    if len(mascotas) == 0:
+
+        print("El cliente no tiene mascotas registradas")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print("\n===== MASCOTAS DISPONIBLES =====\n")
+
+    print(f"{'ID':<5} {'NOMBRE':<15} {'ESPECIE':<15}")
+
+    print("-" * 35)
+
+    for fila in mascotas:
+
+        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<15}")
+
+    mascota_id = input("\nSeleccione ID de la mascota: ")
+
+    print("\n===== SERVICIOS DISPONIBLES =====\n")
+
+    query_servicios = "SELECT servicio_id, tipo_servicio FROM servicio"
 
     cursor.execute(query_servicios)
 
@@ -39,7 +66,7 @@ def generar_turno():
 
     servicio_id = input("\nSeleccione ID del servicio: ")
 
-    query_profesionales = "SELECT matricula, nombre, apellido FROM profesional WHERE servicio_id = %s"
+    query_profesionales = "SELECT dni, nombre, apellido FROM profesional WHERE servicio_id = %s"
 
     cursor.execute(query_profesionales, (servicio_id,))
 
@@ -71,7 +98,7 @@ def generar_turno():
 
         return
 
-    matricula = profesionales[opcion_profesional - 1][0]
+    dni_profesional = profesionales[opcion_profesional - 1][0]
 
     fecha = input("Ingrese fecha del turno (YYYY-MM-DD): ")
 
@@ -109,9 +136,9 @@ def generar_turno():
 
     fecha_hora = f"{fecha} {hora}"
 
-    query_verificar_turno = "SELECT * FROM turno WHERE matricula = %s AND fecha_hora_atencion = %s"
+    query_verificar_turno = "SELECT turno_id FROM turno WHERE dni_profesional = %s AND fecha_hora_atencion = %s"
 
-    cursor.execute(query_verificar_turno, (matricula, fecha_hora))
+    cursor.execute(query_verificar_turno, (dni_profesional, fecha_hora))
 
     turno_existente = cursor.fetchone()
 
@@ -124,9 +151,9 @@ def generar_turno():
 
         return
 
-    query_turno = "INSERT INTO turno (mascota_id, servicio_id, matricula, fecha_hora_atencion) VALUES (%s, %s, %s, %s)"
+    query_turno = "INSERT INTO turno (mascota_id, servicio_id, dni_profesional, fecha_hora_atencion) VALUES (%s, %s, %s, %s)"
 
-    valores = (mascota_id, servicio_id, matricula, fecha_hora)
+    valores = (mascota_id, servicio_id, dni_profesional, fecha_hora)
 
     cursor.execute(query_turno, valores)
 
@@ -137,15 +164,12 @@ def generar_turno():
     cursor.close()
     conexion.close()
 
-from conexion import conectar
-
-
 def ver_turnos():
 
     conexion = conectar()
     cursor = conexion.cursor()
 
-    query = "SELECT turno.turno_id, mascota.nombre, servicio.tipo_servicio, profesional.nombre, profesional.apellido, turno.fecha_hora_atencion FROM turno INNER JOIN mascota ON turno.mascota_id = mascota.mascota_id INNER JOIN servicio ON turno.servicio_id = servicio.servicio_id INNER JOIN profesional ON turno.matricula = profesional.matricula ORDER BY turno.fecha_hora_atencion"
+    query = "SELECT turno.turno_id, mascota.nombre, servicio.tipo_servicio, profesional.nombre, profesional.apellido, turno.fecha_hora_atencion, turno.estado FROM turno INNER JOIN mascota ON turno.mascota_id = mascota.mascota_id INNER JOIN servicio ON turno.servicio_id = servicio.servicio_id INNER JOIN profesional ON turno.dni_profesional = profesional.dni ORDER BY turno.fecha_hora_atencion"
 
     cursor.execute(query)
 
@@ -153,45 +177,90 @@ def ver_turnos():
 
     print("\n===== LISTA DE TURNOS =====\n")
 
-    print(f"{'ID':<5} {'MASCOTA':<15} {'SERVICIO':<20} {'PROFESIONAL':<25} {'FECHA Y HORA':<20}")
+    print(f"{'ID':<5} {'MASCOTA':<15} {'SERVICIO':<20} {'PROFESIONAL':<25} {'FECHA Y HORA':<22} {'ESTADO':<15}")
 
-    print("-" * 90)
+    print("-" * 110)
 
     for fila in resultados:
 
         profesional = f"{fila[3]} {fila[4]}"
 
-        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<20} {profesional:<25} {str(fila[5]):<20}")
+        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<20} {profesional:<25} {str(fila[5]):<22} {fila[6]:<15}")
 
     cursor.close()
     conexion.close()
 
-    
 def cancelar_turno():
 
     conexion = conectar()
     cursor = conexion.cursor()
 
-    turno_id = input("Ingrese ID del turno a cancelar: ")
+    dni = input("Ingrese DNI del cliente: ")
 
-    query_verificar = "SELECT * FROM turno WHERE turno_id = %s"
+    query_cliente = "SELECT nombre, apellido FROM tutor WHERE dni = %s"
 
-    cursor.execute(query_verificar, (turno_id,))
+    cursor.execute(query_cliente, (dni,))
 
-    turno = cursor.fetchone()
+    cliente = cursor.fetchone()
 
-    if turno is None:
+    if cliente is None:
 
-        print("El turno no existe")
+        print("El cliente no existe")
 
         cursor.close()
         conexion.close()
 
         return
 
-    query_eliminar = "DELETE FROM turno WHERE turno_id = %s"
+    query_turnos = """
+    SELECT turno.turno_id,
+           mascota.nombre,
+           servicio.tipo_servicio,
+           profesional.nombre,
+           profesional.apellido,
+           turno.fecha_hora_atencion,
+           turno.estado
+    FROM turno
+    INNER JOIN mascota
+        ON turno.mascota_id = mascota.mascota_id
+    INNER JOIN servicio
+        ON turno.servicio_id = servicio.servicio_id
+    INNER JOIN profesional
+        ON turno.dni_profesional = profesional.dni
+    WHERE mascota.dni_tutor = %s
+    AND turno.estado = 'pendiente'
+    """
 
-    cursor.execute(query_eliminar, (turno_id,))
+    cursor.execute(query_turnos, (dni,))
+
+    turnos = cursor.fetchall()
+
+    if len(turnos) == 0:
+
+        print("El cliente no tiene turnos pendientes")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print("\n===== TURNOS DISPONIBLES =====\n")
+
+    print(f"{'ID':<5} {'MASCOTA':<15} {'SERVICIO':<20} {'PROFESIONAL':<25} {'FECHA Y HORA':<22}")
+
+    print("-" * 95)
+
+    for fila in turnos:
+
+        profesional = f"{fila[3]} {fila[4]}"
+
+        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<20} {profesional:<25} {str(fila[5]):<22}")
+
+    turno_id = input("\nSeleccione ID del turno a cancelar: ")
+
+    query_update = "UPDATE turno SET estado = 'cancelado' WHERE turno_id = %s"
+
+    cursor.execute(query_update, (turno_id,))
 
     conexion.commit()
 
