@@ -52,7 +52,7 @@ def agregar_profesional():
 
     dni = input("Ingrese DNI: ")
 
-    query_verificar = "SELECT * FROM profesional WHERE dni = %s"
+    query_verificar = "SELECT nombre FROM profesional WHERE dni = %s"
 
     cursor.execute(query_verificar, (dni,))
 

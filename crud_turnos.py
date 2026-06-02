@@ -100,7 +100,7 @@ def generar_turno():
 
     dni_profesional = profesionales[opcion_profesional - 1][0]
 
-    fecha = input("Ingrese fecha del turno (YYYY-MM-DD): ")
+    fecha = input("Ingrese fecha del turno (AAAA-MM-DD): ")
 
     horarios = [
         "09:00:00",
@@ -265,6 +265,167 @@ def cancelar_turno():
     conexion.commit()
 
     print("Turno cancelado correctamente")
+
+    cursor.close()
+    conexion.close()
+
+from conexion import conectar
+
+
+def modificar_turno():
+
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    dni = input("Ingrese DNI del cliente: ")
+
+    query_cliente = "SELECT nombre, apellido FROM tutor WHERE dni = %s"
+
+    cursor.execute(query_cliente, (dni,))
+
+    cliente = cursor.fetchone()
+
+    if cliente is None:
+
+        print("El cliente no existe")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    query_turnos = """
+    SELECT turno.turno_id,
+           mascota.nombre,
+           servicio.tipo_servicio,
+           profesional.nombre,
+           profesional.apellido,
+           turno.fecha_hora_atencion,
+           turno.estado,
+           turno.dni_profesional
+    FROM turno
+    INNER JOIN mascota
+        ON turno.mascota_id = mascota.mascota_id
+    INNER JOIN servicio
+        ON turno.servicio_id = servicio.servicio_id
+    INNER JOIN profesional
+        ON turno.dni_profesional = profesional.dni
+    WHERE mascota.dni_tutor = %s
+    AND turno.estado = 'pendiente'
+    """
+
+    cursor.execute(query_turnos, (dni,))
+
+    turnos = cursor.fetchall()
+
+    if len(turnos) == 0:
+
+        print("El cliente no tiene turnos pendientes")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    print("\n===== TURNOS DISPONIBLES =====\n")
+
+    print(f"{'ID':<5} {'MASCOTA':<15} {'SERVICIO':<20} {'PROFESIONAL':<25} {'FECHA Y HORA':<22}")
+
+    print("-" * 95)
+
+    for fila in turnos:
+
+        profesional = f"{fila[3]} {fila[4]}"
+
+        print(f"{fila[0]:<5} {fila[1]:<15} {fila[2]:<20} {profesional:<25} {str(fila[5]):<22}")
+
+    turno_id = input("\nSeleccione ID del turno a modificar: ")
+
+    turno_seleccionado = None
+
+    for fila in turnos:
+
+        if str(fila[0]) == turno_id:
+
+            turno_seleccionado = fila
+
+            break
+
+    if turno_seleccionado is None:
+
+        print("Turno inválido")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    dni_profesional = turno_seleccionado[7]
+
+    fecha = input("Ingrese nueva fecha (AAAA-MM-DD): ")
+
+    horarios = [
+        "09:00:00",
+        "10:00:00",
+        "11:00:00",
+        "12:00:00",
+        "13:00:00",
+        "16:00:00",
+        "17:00:00",
+        "18:00:00",
+        "19:00:00",
+        "20:00:00"
+    ]
+
+    print("\n===== HORARIOS DISPONIBLES =====\n")
+
+    for i, horario in enumerate(horarios, start=1):
+
+        print(f"{i} - {horario}")
+
+    opcion_horario = int(input("\nSeleccione un horario: "))
+
+    if opcion_horario < 1 or opcion_horario > len(horarios):
+
+        print("Horario inválido")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    hora = horarios[opcion_horario - 1]
+
+    nueva_fecha_hora = f"{fecha} {hora}"
+
+    query_verificar = """
+    SELECT turno_id
+    FROM turno
+    WHERE dni_profesional = %s
+    AND fecha_hora_atencion = %s
+    AND turno_id != %s
+    """
+
+    cursor.execute(query_verificar, (dni_profesional, nueva_fecha_hora, turno_id))
+
+    conflicto = cursor.fetchone()
+
+    if conflicto is not None:
+
+        print("El profesional ya tiene un turno en ese horario")
+
+        cursor.close()
+        conexion.close()
+
+        return
+
+    query_update = "UPDATE turno SET fecha_hora_atencion = %s WHERE turno_id = %s"
+
+    cursor.execute(query_update, (nueva_fecha_hora, turno_id))
+
+    conexion.commit()
+
+    print("Turno modificado correctamente")
 
     cursor.close()
     conexion.close()

@@ -39,7 +39,7 @@ def menu_turnos():
         print("1. Generar turno")
         print("2. Ver turnos")
         print("3. Cancelar turno")
-        print("4. Buscar mascota")
+        print("4. Modificar Turno")
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -57,7 +57,8 @@ def menu_turnos():
             crud_turnos.cancelar_turno()
 
         elif opcion == "4":
-            print("Buscar mascota")
+            print("Modificar Turno")
+            crud_turnos.modificar_turno()
 
         elif opcion == "0":
             break
@@ -205,7 +206,7 @@ def menu_servicios():
         print("1. Agregar servicio")
         print("2. Ver servicios")
         print("3. Modificar servicio")
-        print("4. Eliminar servicio")
+        
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -221,8 +222,6 @@ def menu_servicios():
         elif opcion == "3":
             print("Modificar servicio")
 
-        elif opcion == "4":
-            print("Eliminar servicio")
 
         elif opcion == "0":
             break
@@ -236,8 +235,7 @@ def menu_profesionales():
         print("\n===== GESTIONAR PROFESIONALES =====")
         print("1. Agregar profesional")
         print("2. Ver profesionales")
-        print("3. Modificar profesional")
-        print("4. Eliminar profesional")
+        print("3. Modificar profesional")        
         print("0. Volver")
 
         opcion = input("Seleccione una opción: ")
@@ -252,9 +250,7 @@ def menu_profesionales():
 
         elif opcion == "3":
             print("Modificar profesional")
-
-        elif opcion == "4":
-            print("Eliminar profesional")
+       
 
         elif opcion == "0":
             break
