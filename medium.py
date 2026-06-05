@@ -26,80 +26,151 @@ while True:
     # GENERAR TURNO
     if opcion == "1":
 
-        mascota_id = input("Ingrese ID mascota: ")
+        dni = input("Ingrese DNI del cliente: ")
 
-        query_mascota = """
-        SELECT nombre
-        FROM mascota
-        WHERE mascota_id = %s
+        query_cliente = """
+        SELECT nombre, apellido
+        FROM tutor
+        WHERE dni = %s
         """
 
-        cursor.execute(query_mascota, (mascota_id,))
+        cursor.execute(query_cliente, (dni,))
 
-        mascota = cursor.fetchone()
+        cliente = cursor.fetchone()
 
-        if mascota is None:
+        if cliente is None:
 
-            print("La mascota no existe")
+            print("El cliente no existe")
 
         else:
 
-            servicio_id = input("Ingrese ID servicio: ")
-
-            query_servicio = """
-            SELECT tipo_servicio
-            FROM servicio
-            WHERE servicio_id = %s
+            query_mascotas = """
+            SELECT mascota_id, nombre
+            FROM mascota
+            WHERE dni_tutor = %s
             """
 
-            cursor.execute(query_servicio, (servicio_id,))
+            cursor.execute(query_mascotas, (dni,))
 
-            servicio = cursor.fetchone()
+            mascotas = cursor.fetchall()
 
-            if servicio is None:
+            if len(mascotas) == 0:
 
-                print("El servicio no existe")
+                print("El cliente no tiene mascotas")
 
             else:
 
-                dni_profesional = input("Ingrese DNI profesional: ")
+                print("\n===== MASCOTAS DISPONIBLES =====\n")
 
-                query_profesional = """
-                SELECT nombre, apellido
-                FROM profesional
-                WHERE dni = %s
+                for fila in mascotas:
+
+                    print(f"ID: {fila[0]} | Mascota: {fila[1]}")
+
+                mascota_id = input("\nSeleccione ID mascota: ")
+
+                query_verificar_mascota = """
+                SELECT nombre
+                FROM mascota
+                WHERE mascota_id = %s
                 """
 
-                cursor.execute(query_profesional, (dni_profesional,))
+                cursor.execute(query_verificar_mascota, (mascota_id,))
 
-                profesional = cursor.fetchone()
+                mascota = cursor.fetchone()
 
-                if profesional is None:
+                if mascota is None:
 
-                    print("El profesional no existe")
+                    print("La mascota no existe")
 
                 else:
 
-                    fecha_hora = input("Ingrese fecha y hora (YYYY-MM-DD HH:MM:SS): ")
-
-                    query = """
-                    INSERT INTO turno
-                    (mascota_id, servicio_id, dni_profesional, fecha_hora_atencion)
-                    VALUES (%s, %s, %s, %s)
+                    query_servicios = """
+                    SELECT servicio_id, tipo_servicio
+                    FROM servicio
                     """
 
-                    valores = (
-                        mascota_id,
-                        servicio_id,
-                        dni_profesional,
-                        fecha_hora
-                    )
+                    cursor.execute(query_servicios)
 
-                    cursor.execute(query, valores)
+                    servicios = cursor.fetchall()
 
-                    conexion.commit()
+                    print("\n===== SERVICIOS DISPONIBLES =====\n")
 
-                    print("Turno generado correctamente")
+                    for fila in servicios:
+
+                        print(f"ID: {fila[0]} | Servicio: {fila[1]}")
+
+                    servicio_id = input("\nSeleccione ID servicio: ")
+
+                    query_verificar_servicio = """
+                    SELECT tipo_servicio
+                    FROM servicio
+                    WHERE servicio_id = %s
+                    """
+
+                    cursor.execute(query_verificar_servicio, (servicio_id,))
+
+                    servicio = cursor.fetchone()
+
+                    if servicio is None:
+
+                        print("El servicio no existe")
+
+                    else:
+
+                        query_profesionales = """
+                        SELECT dni, nombre, apellido
+                        FROM profesional
+                        WHERE servicio_id = %s
+                        """
+
+                        cursor.execute(query_profesionales, (servicio_id,))
+
+                        profesionales = cursor.fetchall()
+
+                        print("\n===== PROFESIONALES DISPONIBLES =====\n")
+
+                        for fila in profesionales:
+
+                            print(f"DNI: {fila[0]} | Profesional: {fila[1]} {fila[2]}")
+
+                        dni_profesional = input("\nIngrese DNI profesional: ")
+
+                        query_verificar_profesional = """
+                        SELECT nombre, apellido
+                        FROM profesional
+                        WHERE dni = %s
+                        """
+
+                        cursor.execute(query_verificar_profesional, (dni_profesional,))
+
+                        profesional = cursor.fetchone()
+
+                        if profesional is None:
+
+                            print("El profesional no existe")
+
+                        else:
+
+                            fecha_hora = input("Ingrese fecha y hora (AAAA-MM-DD HH:MM): ")
+
+                            query = """
+                            INSERT INTO turno
+                            (mascota_id, servicio_id, dni_profesional, fecha_hora_atencion)
+                            VALUES (%s, %s, %s, %s)
+                            """
+
+                            valores = (
+                                mascota_id,
+                                servicio_id,
+                                dni_profesional,
+                                fecha_hora
+                            )
+
+                            cursor.execute(query, valores)
+
+                            conexion.commit()
+
+                            print("Turno generado correctamente")
 
 
     # MODIFICAR TURNO
